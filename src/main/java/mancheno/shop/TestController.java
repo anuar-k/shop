@@ -2,6 +2,7 @@ package mancheno.shop;
 
 import mancheno.shop.controllers.response.PageDataResponse;
 import mancheno.shop.entity.Category;
+import mancheno.shop.repository.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,9 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/test")
 public class    TestController {
+
+    ProductRepository productRepository;
+
     @GetMapping(path = "/first")
     public List<Category> first() {
         List<Category> list = new ArrayList<>();
@@ -85,7 +89,11 @@ public class    TestController {
                 strings.subList(startPageItem, page * size),
                 PageRequest.of(page, size),
                 strings.size()
+
+
         ));
 
     }
+
+
 }

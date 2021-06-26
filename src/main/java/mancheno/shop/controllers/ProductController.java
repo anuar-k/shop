@@ -3,6 +3,8 @@ package mancheno.shop.controllers;
 import mancheno.shop.controllers.response.PageDataResponse;
 import mancheno.shop.controllers.response.ValidationErrorResponse;
 import mancheno.shop.entity.Product;
+import mancheno.shop.repository.ProductRepository;
+import mancheno.shop.repository.specs.ProductSpecs;
 import mancheno.shop.service.ProductService;
 import mancheno.shop.validator.ProductValidator;
 import org.springframework.data.domain.*;
@@ -20,10 +22,12 @@ import java.util.*;
 public class ProductController {
     private final ProductValidator productValidator;
     private final ProductService productService;
+    private final ProductRepository productRepository;
 
-    public ProductController(ProductValidator productValidator, ProductService productService) {
+    public ProductController(ProductValidator productValidator, ProductService productService, ProductRepository productRepository) {
         this.productService = productService;
         this.productValidator = productValidator;
+        this.productRepository = productRepository;
     }
 
 //    @GetMapping
@@ -105,32 +109,32 @@ public class ProductController {
             params.remove("size");
         }
 
-            PageRequest pagable = null;
-            if (page != null && size != null) {
-                Integer currentPage = 0;
-                if (params.containsKey("page") || page > 0) {
-                    currentPage = page - 1;
-                }
-                String sortType = params.get("sortType");
-                String sortBy = params.get("sortBy");
+        PageRequest pagable = null;
+        if (page != null && size != null) {
+            Integer currentPage = 0;
+            if (params.containsKey("page") || page > 0) {
+                currentPage = page - 1;
+            }
+            String sortType = params.get("sortType");
+            String sortBy = params.get("sortBy");
 
-                //test
-                Map<String, String> sorts = new HashMap<>();
-                sorts.put("name", "DESC");
-                sorts.put("price", "ASC");
+            //test
+            Map<String, String> sorts = new HashMap<>();
+            sorts.put("name", "DESC");
+            sorts.put("price", "ASC");
 
-                if (true) {
-                    List<Sort.Order> orders = new ArrayList<>();
-                    for (Map.Entry<String, String> entry : sorts.entrySet()) {
-                        if (entry.getValue().equals("ASC")) {
-                            orders.add(Sort.Order.asc(entry.getKey()));
-                        }
-                        if (entry.getValue().equals("DESC")) {
-                            orders.add(Sort.Order.desc(entry.getKey()));
-                        }
+            if (true) {
+                List<Sort.Order> orders = new ArrayList<>();
+                for (Map.Entry<String, String> entry : sorts.entrySet()) {
+                    if (entry.getValue().equals("ASC")) {
+                        orders.add(Sort.Order.asc(entry.getKey()));
                     }
-                    pagable = PageRequest.of(currentPage, size, Sort.by(orders));
+                    if (entry.getValue().equals("DESC")) {
+                        orders.add(Sort.Order.desc(entry.getKey()));
+                    }
                 }
+                pagable = PageRequest.of(currentPage, size, Sort.by(orders));
+            }
 //                else {
 //                    pagable = PageRequest.of(currentPage, size, Sort.unsorted());
 //                }
@@ -153,6 +157,13 @@ public class ProductController {
         } else {
             return new PageDataResponse(productService.getAll(params, Pageable.unpaged()));
         }
+    }
+
+    @GetMapping(path = "/spec")
+    public List<Product> testSpecList() {
+        Map<Long, String> options = new HashMap<>();
+        options.put(1L, "Matris");
+       return productRepository.findAll(ProductSpecs.byAll(1L, "a", 100.0, 20000.0,options));
     }
 
     @InitBinder
